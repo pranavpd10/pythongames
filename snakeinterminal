@@ -1,0 +1,174 @@
+from time import sleep
+import random
+
+
+class Snake:
+    def __init__(self):
+        self.intialstage = [[2, 0, 4],[2, 1, 4], [2, 2, 4]]
+        self.matsize = 4
+        self.oppomove = {4:6,6:4,8:5,5:8}
+        self.mousel = [[2,3],[0,0],[2,1]]
+        self.mouseindex = 0
+        self.mouse = self.newmousepoint()
+        self.headsmove = 1
+        self.gameon = 1
+
+    def move(self, firstmove = None):
+        self.findcollision()
+        if self.gameon == 0:
+            return True
+        ''' if next move is first time given apply next move, set currmove to nextmove
+        copy currntmove to some state variable to next points and apply current state
+        and set state variable to current variable'''
+        # if self.oppomove[firstmove] == self.intialstage[0][2]:
+        #     return
+        if firstmove != None:
+            if self.oppomove[firstmove] == self.intialstage[0][2]:
+                return
+        moveflag = 0
+        movestate = self.intialstage[0][2]
+        if firstmove != None:
+            currentmove = firstmove
+            moveflag = 1
+        #move logic
+        length = len(self.intialstage)
+        print(length)
+        index = 0
+        while index < len(self.intialstage):
+            if moveflag ==0:
+                currentmove = self.intialstage[index][2]
+            print(currentmove)
+            if currentmove == 4:
+                beforemod = self.intialstage[index].copy()
+                self.intialstage[index][1] = self.intialstage[index][1]-1
+                if self.intialstage[index][1] == -1:
+                    self.intialstage[index][1] = self.matsize-1
+                print(self.intialstage[index], beforemod)
+            elif currentmove == 6:
+                beforemod = self.intialstage[index].copy()
+                self.intialstage[index][1] = self.intialstage[index][1]+1
+                if self.intialstage[index][1] == self.matsize:
+                    self.intialstage[index][1] = 0
+            elif currentmove == 5:
+                beforemod = self.intialstage[index].copy()
+                self.intialstage[index][0] = self.intialstage[index][0]+1
+                if self.intialstage[index][0] == self.matsize:
+                    self.intialstage[index][0] = 0
+            elif currentmove == 8:
+                beforemod = self.intialstage[index].copy()
+                self.intialstage[index][0] = self.intialstage[index][0]-1
+                if self.intialstage[index][0] == -1:
+                    self.intialstage[index][0] = self.matsize-1
+
+            if moveflag == 1:
+                #set currentmove in the point to new firstmove set moveflag to 0 copy
+                self.intialstage[index][2] = currentmove
+                movestate = self.intialstage[index][2]
+                print(movestate)
+                moveflag = 0
+            #currentmove to state
+            else:
+                nowmovestate = self.intialstage[index][2]
+                self.intialstage[index][2] = movestate
+                movestate = nowmovestate
+                print(movestate)
+            booleanmo, index,end = self.ismouse(beforemod, index)
+            if end == "endgame":
+                print("you won")
+                break
+            if booleanmo:
+                self.intialstage[index-1][2] = movestate
+                break
+            index = index + 1
+            # print(self.intialstage, beforemod)
+
+    def ismouse(self, beforemod, index):
+        head = self.intialstage[index][0:2]
+        mfound = 1
+        for i in range(2):
+            if head[i] != self.mouse[i]:
+                mfound = 0
+                return False,index,""
+        if mfound ==1:
+            self.intialstage.insert(1,beforemod)
+            print(self.intialstage)
+            self.mouseindex += 1
+            self.mouse = self.newmousepoint()
+            if self.mouse ==None:
+                return True, index+2, "endgame"
+            return True, index+2, ""
+
+    def display(self):
+        self.findcollision()
+        if self.gameon == 0:
+            return True
+        gamematrix = [[0 for j in range(self.matsize)] for i in range(self.matsize)]
+        for ind, point in enumerate(self.intialstage, 1):
+            # print(ind,point)
+            gamematrix[point[0]][point[1]] = ind
+        gamematrix[self.mouse[0]][self.mouse[1]] = -8
+        for row in gamematrix:
+            print(row)
+
+    def newmousepoint(self):
+        avaliblepoint = [[i,j] for i in range(self.matsize) for j in range(self.matsize)]
+        for i in self.intialstage:
+            avaliblepoint.remove(i[:2])
+        return random.choice(avaliblepoint)
+        # print(random.choice(avaliblepoint))
+
+    def findcollision(self):
+        length = len(self.intialstage)
+        detectcol = 0
+        for i in range(length):
+            lookup = self.intialstage[i].copy()
+            for j in range(length):
+                if i == j:
+                    print("count")
+                    continue
+                else:
+                    print(f"in i j {i} {j}")
+                    count = 0
+                    for val in range(2):
+                        if lookup[val] == self.intialstage[j][val]:
+                            count += 1
+                    if count == 2:
+                        detectcol = 1
+                        print(f"in lookup {id(lookup)} {lookup} \ "
+                              f"{id(self.intialstage[j])} {self.intialstage[j]}")
+                        break
+                if detectcol == 1:
+                    break
+            if detectcol == 1:
+                break
+        if detectcol == 1:
+            self.gameon = 0
+
+
+snake = Snake()
+snake.display()
+print(snake.mouse)
+# print(snake.ismouse([1,1]))
+while True:
+    sleep(1)
+    # snake.move()
+    gameend = snake.display()
+    if gameend:
+        print("you collide")
+        break
+    br = input()
+    if br == 'n':
+        break
+    if br in ["8","4","5","6"] :
+        gameend = snake.move(int(br))
+    else:
+        gameend = snake.move()
+    if gameend:
+        print("you collide")
+        break
+
+
+# be = snake.intialstage[0].copy()
+# snake.intialstage[0][1] = snake.intialstage[0][1]+1
+# af = snake.intialstage[0].copy()
+# print(be,af)
