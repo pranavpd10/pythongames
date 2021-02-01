@@ -1,0 +1,32 @@
+import random
+if __name__ == '__main__':
+     windict = {"comp":0, "you":0}
+     for i in range(5):
+         choises = ["r", "p", "s"]
+         compchoise = random.choice(choises)
+         # print(compchoise)
+         mychoise = input("your choice in r p s \t")
+         if mychoise not in ["r", "s", "p"]:
+             print("invalid code")
+         elif mychoise == compchoise:
+             print("tie")
+         else:
+             gamedict = {"r":None,"p":None, "s":None}
+             gamedict[mychoise] = "you"
+             gamedict[compchoise] = "comp"
+             if gamedict["r"]==None:
+                  print(f'{gamedict["s"]} wins')
+                  windict[gamedict["s"]] = windict[gamedict["s"]] +1
+             elif gamedict["p"]==None:
+                  print(f'{gamedict["r"]} wins')
+                  windict[gamedict["r"]] = windict[gamedict["r"]] + 1
+             else:
+                  print(f'{gamedict["p"]} wins')
+                  windict[gamedict["p"]] = windict[gamedict["p"]] + 1
+
+     if windict["you"] == windict["comp"]:
+          print(f'series tied by {windict["you"]} - {windict["comp"]}')
+     elif windict["you"] >  windict["comp"]:
+          print(f'you won by {windict["you"]} - {windict["comp"]}')
+     else:
+          print(f'you lose  by {windict["you"]} - {windict["comp"]}')
